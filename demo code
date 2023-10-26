@@ -1,0 +1,46 @@
+#include <Servo.h>
+#define SV_Pin 8
+Servo myS1;
+String errorlevel;
+int pos = 0;
+String out = "Enter your number";
+int x;
+
+void setup() {
+  myS1.attach(SV_Pin);
+  Serial.begin(9600);
+}
+
+void uploadcode(){
+
+  // Mở cửa sổ cmd
+  system("cmd /c start cmd.exe");
+
+  // Di chuyển đến thư mục chứa sketch
+  system("cd D:\\arduino");
+
+  // Compile sketch
+  system("D:\\arduino\\arduino_debug.exe --verify %CD%\\Blink.ino");
+  system("for /f \"tokens=*\" %%a in ('echo errorlevel') do set compile_error=%%a");
+  // Upload nếu compile thành công
+  if(errorlevel == 0) {
+    system("D:\\arduino\\arduino_debug.exe --upload %CD%\\Blink.ino");
+  }
+
+  // Đóng cmd
+  system("taskkill /IM cmd.exe /F"); 
+
+}
+
+void loop() {
+  Serial.println(out);
+  myS1.write(pos);
+  if(Serial.available() != 0) {
+    x = Serial.parseInt();
+    if(x == 1) pos = 0;
+    if(x == 2) pos = 90;
+    if(x == 3) pos = 180;
+    uploadcode();
+  }
+  Serial.println(x);
+}
